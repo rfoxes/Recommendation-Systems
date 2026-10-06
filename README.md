@@ -23,6 +23,14 @@ Run `src.run_v1` first: the other two steps use the model settings it tunes.
 
 Each step takes about 6 minutes, because it replays a whole week offline: the models are retrained every 6 hours on all earlier data and predict the next 6 hours, and Oct 29–30 are held out. Serving a single request is about 7 ms (`analysis/latency.py`).
 
+## Export for serving
+
+```bash
+.venv/bin/python -m src.export   # after src.run_v1 -> artifacts/v1/
+```
+
+Trains V1 on every row and writes it as plain files for a serving process without pandas or PyTorch: the LightGBM booster (`lightgbm.txt`), the factorization machine weights (`fm_weights.npz`), the feature encodings (`encoders.json`), a golden sample of real rows with V1's predictions, and a manifest with checksums. `src/portable.py` is the reference scorer for those files; the export checks it reproduces V1 on the golden sample. Exported models are published as GitHub releases.
+
 ## Experiments
 
 Each script in `eda/` and `analysis/` backs one design decision and writes its results to `eda/results/` or `analysis/results/`. They're standalone, and some read the pipeline's outputs, so run them after the pipeline. For example:
